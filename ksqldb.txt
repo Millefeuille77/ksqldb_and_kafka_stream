@@ -1,0 +1,18 @@
+CREATE STREAM TRANSACTION (step VARCHAR, type VARCHAR, amount DOUBLE, nameOrig VARCHAR, oldbalanceOrg DOUBLE, 
+                              newbalanceOrig DOUBLE, nameDest VARCHAR,oldbalanceDest DOUBLE, newbalanceDest DOUBLE, 
+                              isFraud INT, isFlaggedFraud INT)
+  WITH (kafka_topic='product', value_format='json', partitions=1);
+
+CREATE TABLE FRAUD_TRANSACTION_TYPE AS 
+SELECT type,
+    SUM(amount)
+FROM TRANSACTION 
+WHERE ISFRAUD = 1
+GROUP BY type;
+
+CREATE TABLE FRAUD_VICTIM AS SELECT
+  NAMEORIG,
+  SUM(AMOUNT) as TOTAL_AMOUNT
+FROM TRANSACTION
+WHERE (ISFRAUD = '1')
+GROUP BY NAMEORIG;
